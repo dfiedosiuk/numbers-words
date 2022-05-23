@@ -17,13 +17,10 @@ class UpperStream {
 
   def createTopology(): Topology = {
     val builder = new StreamsBuilder
-    val text = builder.stream[String, String]("input")
-    val textUpper = text
+    builder
+      .stream[String, String]("input")
       .flatMapValues(text => text.toUpperCase.split("\\W+"))
-
-    println(textUpper)
-    textUpper.to("output")
-
+      .to("output")
     builder.build
   }
 
