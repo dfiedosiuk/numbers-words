@@ -4,11 +4,11 @@ import org.apache.kafka.streams.scala.serialization.Serdes.stringSerde
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig, Topology}
 import scopt.OParser
 
-class Stream extends App {
+object Stream extends App {
 
   import org.apache.kafka.streams.scala._
 
-  case class Config(numbersTopic: String, textTopic: String, outputTopic: String, multiply: Int)
+  case class Config(numbersTopic: String, textTopic: String, outputNumbers: String,outputText: String, multiply: Int)
 
   val myBuilder = OParser.builder[Config]
 
@@ -25,7 +25,10 @@ class Stream extends App {
         .action((value, cfg) => cfg.copy(textTopic = value))
         .text("My name property"),
       opt[String]('o', "outputTopic")
-        .action((value, cfg) => cfg.copy(outputTopic = value))
+        .action((value, cfg) => cfg.copy(outputNumbers = value))
+        .text("My name property"),
+      opt[String]('p', "outputTopic")
+        .action((value, cfg) => cfg.copy(outputText = value))
         .text("My name property"),
       opt[Int]('m', "multiply")
         .action((value, cfg) => cfg.copy(multiply = value))
@@ -35,7 +38,7 @@ class Stream extends App {
   }
 
   val config = OParser.parse(myParser, args,
-    Config(numbersTopic = "", textTopic = "", outputTopic = "", multiply = 0)).getOrElse {
+    Config(numbersTopic = "", textTopic = "", outputNumbers = "",outputText = "", multiply = 0)).getOrElse {
     println("Not enough or incorrect command-line arguments. Exiting...")
     sys.exit(-1)
   }
@@ -50,7 +53,7 @@ class Stream extends App {
     builder
       .stream[String, String](config.textTopic)
       .flatMapValues(text => text.toUpperCase.split("\\W+"))
-      .to("output")
+      .to(config.outputText)
     builder.build
   }
 
@@ -58,28 +61,32 @@ class Stream extends App {
     val builder = new StreamsBuilder
     builder
       .stream[String, String](config.numbersTopic)
-      .flatMapValues(numbers => numbers.split("\\W+"))
-      .to("output")
+      .mapValues(numbers => changeNumbers(numbers, config.multiply))
+      .to(config.outputNumbers)
     builder.build
   }
 
-  def changeNumbers(text: String, multiply: Int) ={
-    val numbersText = text.split("\\W+")
+  def changeNumbers(text: String, multiply: Int): String = {
+    val numbersText = text.split(" ")
+    numbersText.foreach(println)
     val numbers = numbersText.map(_.toInt)
 
-    numbers.map{
-      case n if (n > 0) => (n*multiply).toString
+    numbers.map {
+      case n if (n > 0) => (n * multiply).toString
       case n if (n == 0) => "0"
-      case n if (n < 0)=> s"negative number: ${n}"
-    }.mkString(" ")
+      case n if (n < 0) => s"negative number: ${n}"
+    }.mkString(" , ")
 
   }
 
-  val streams: KafkaStreams = new KafkaStreams(createTopologyWords(), props)
-  streams.start()
+  val streamsNumbers: KafkaStreams = new KafkaStreams(createTopologyNumbers(), props)
+//  val streamsWords: KafkaStreams = new KafkaStreams(createTopologyWords(), props)
+  streamsNumbers.start()
+//  streamsWords.start()
 
   sys.ShutdownHookThread {
-    streams.close()
+    streamsNumbers.close()
+//    streamsWords.close()
   }
 
 }

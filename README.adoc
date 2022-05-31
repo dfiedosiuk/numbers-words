@@ -1,14 +1,37 @@
-= Exercise
+= Kafka Streams
 :toc:
+
+Program for given arguments in command line (for example):
+[source]
+-n number -t text -o outNumber -p outText -m 10
+
+takes numbers and words from topics number and text. Actions on messeges in topic text:
+
+. Words to upper case letters
+
+Actions on messeges in topic number:
+
+. Multiplies positive numbers by a number given on command line +
+. Adds “negative number: “ prefix to negative numbers
+
+I made two topologies but for two streams but I do not know how to merge them in two topics. App could be spleted into two apps opperating each topic seperatly.
+Each topology was seperated to do tests. No time no tests.
+
 
 == Dependencies
 * Java 8+
 * Scala 2.12+
 * kafka-streams-scala 3.2+
 * scalatest 3.2+
+* scopt 4.0+
 
 Specific dependencies in file _build.sbt_
 
 == How to run
 
+[source]
+sbt run
+
 == Troubleshooting
+
+Messages in topic _inputNumbers_ need to have exact spaces " " between each number
