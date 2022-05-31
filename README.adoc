@@ -1,0 +1,14 @@
+= Exercise
+:toc:
+
+== Dependencies
+* Java 8+
+* Scala 2.12+
+* kafka-streams-scala 3.2+
+* scalatest 3.2+
+
+Specific dependencies in file _build.sbt_
+
+== How to run
+
+== Troubleshooting
